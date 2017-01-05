@@ -2,17 +2,16 @@
 """
 Helper functions used in views.
 """
-
 import csv
-from json import dumps
-from functools import wraps
+import logging
 from datetime import datetime
+from functools import wraps
+from json import dumps
 
 from flask import Response
 
 from presence_analyzer.main import app
 
-import logging
 log = logging.getLogger(__name__)  # pylint: disable=invalid-name
 
 
@@ -75,7 +74,7 @@ def group_by_weekday(items):
     """
     Groups presence entries by weekday.
     """
-    result = [[], [], [], [], [], [], []]  # one list for every day in week
+    result = 7 * [[]]  # one list for every day in week
     for date in items:
         start = items[date]['start']
         end = items[date]['end']
