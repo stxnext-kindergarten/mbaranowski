@@ -2,17 +2,19 @@
 """
 Helper functions used in views.
 """
-import csv
-import logging
+from calendar import day_abbr
+from csv import reader
 from datetime import datetime
 from functools import wraps
 from json import dumps
+from logging import getLogger
 
 from flask import Response
 
 from presence_analyzer.main import app
 
-log = logging.getLogger(__name__)  # pylint: disable=invalid-name
+
+log = getLogger(__name__)  # pylint: disable=invalid-name
 
 
 def jsonify(function):
@@ -50,8 +52,10 @@ def get_data():
     }
     """
     data = {}
+
     with open(app.config['DATA_CSV'], 'r') as csvfile:
-        presence_reader = csv.reader(csvfile, delimiter=',')
+        presence_reader = reader(csvfile, delimiter=',')
+
         for i, row in enumerate(presence_reader):
             if len(row) != 4:
                 # ignore header and footer lines
@@ -74,11 +78,13 @@ def group_by_weekday(items):
     """
     Groups presence entries by weekday.
     """
-    result = 7 * [[]]  # one list for every day in week
+    result = {i: [] for i in range(7)}
+
     for date in items:
         start = items[date]['start']
         end = items[date]['end']
         result[date.weekday()].append(interval(start, end))
+
     return result
 
 
@@ -101,3 +107,25 @@ def mean(items):
     Calculates arithmetic mean. Returns zero for empty lists.
     """
     return float(sum(items)) / len(items) if len(items) > 0 else 0
+
+
+def group_by_weekday_start_end(items):
+    """
+    Groups the beginnings of the ends of presence entries by weekday.
+    """
+    result = {i: {'start': [], 'end': []} for i in range(7)}
+
+    for date in items:
+        start = seconds_since_midnight(items[date]['start'])
+        end = seconds_since_midnight(items[date]['end'])
+        result[date.weekday()]['start'].append(start)
+        result[date.weekday()]['end'].append(end)
+
+    return result
+
+
+def mean_by_weekday(day, val):
+    """
+    Return a list that contain weekday, mean of beginning and end of presence.
+    """
+    return [day_abbr[day], mean(val['start']), mean(val['end'])]

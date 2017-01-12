@@ -1,22 +1,30 @@
-from setuptools import setup, find_packages
+# -*- coding: utf-8 -*-
+"""
+Presence analyzer setup.
+"""
 import os
+from setuptools import find_packages, setup
 
-name = "presence_analyzer"
-version = "0.1.0"
+
+NAME = 'presence_analyzer'
+VERSION = '0.1.0'
 
 
 def read(*rnames):
+    """
+    Returns file's content.
+    """
     return open(os.path.join(os.path.dirname(__file__), *rnames)).read()
 
 
 setup(
-    name=name,
-    version=version,
-    description="Presence analyzer",
+    name=NAME,
+    version=VERSION,
+    description='Presence analyzer',
     long_description=read('README.md'),
     classifiers=[],
-    keywords="",
-    author="",
+    keywords='',
+    author='',
     author_email='',
     url='',
     license='MIT',
@@ -28,6 +36,5 @@ setup(
         'setuptools',
         'Flask',
     ],
-    entry_points="""
-    """,
+    entry_points='',
 )
