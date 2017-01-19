@@ -1,18 +1,18 @@
 <!doctype html>
 <html lang=en>
 <head>
-    <meta charset=utf-8>
+    <meta charset=utf-8 />
     <title>Presence analyzer</title>
     <meta name="keywords" content="" />
-    <meta name="description" content=""/>
-    <meta name="author" content="STX Next sp. z o.o."/>
-    <meta name="viewport" content="width=device-width; initial-scale=1.0">
-    
+    <meta name="description" content="" />
+    <meta name="author" content="STX Next sp. z o.o." />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
     <link href="/static/css/normalize.css" media="all" rel="stylesheet" type="text/css" />
     <style type="text/css">
         body {
             font-family: latoregular, Helvetica, Arial;
-            background-color: #EEE;
+            background-color: #eee;
         }
         #main {
             width: 800px;
@@ -21,14 +21,14 @@
         }
         #content {
             padding: 0 2em;
-            border: 1px solid #AAA;
-            background-color: #FFF;
-            
+            border: 1px solid #aaa;
+            background-color: #fff;
+
             border: 1px solid black;
             clear: both;
             padding: 0 1em;
         }
-        #chart_div {
+        #chart-div {
             width: 750px;
             height: 750px;
         }
@@ -38,14 +38,14 @@
             padding: 0;
             margin: 0;
         }
-        
+
         #header li {
             float: left;
             border: 1px solid #bbb;
             border-bottom-width: 0;
             margin: 0;
         }
-        
+
         #header a {
             text-decoration: none;
             display: block;
@@ -55,15 +55,15 @@
             width: 12em;
             text-align: center;
         }
-        
+
         #header a:hover {
             background: #ddf;
         }
-        
+
         #header #selected {
             border-color: black;
         }
-        
+
         #header #selected a {
             position: relative;
             top: 1px;
@@ -79,28 +79,35 @@
         google.load("visualization", "1", {packages:["corechart"], 'language': 'en'});
 
         (function($) {
-            $(document).ready(function(){
-                var loading = $('#loading');
-                $.getJSON("/api/v1/users", function(result) {
-                    var dropdown = $("#user_id");
+            $(document).ready(function() {
+                var $loading = $('#loading');
+
+                $.getJSON('/api/v1/users', function(result) {
+                    var $dropdown = $('#user-id');
                     $.each(result, function(item) {
-                        dropdown.append($("<option />").val(this.user_id).text(this.name));
+                        $dropdown.append($('<option/>', {
+                            'val': this.user_id,
+                            'text': this.name
+                        }))
                     });
-                    dropdown.show();
-                    loading.hide();
+                    $dropdown.show();
+                    $loading.hide();
                 });
-                $('#user_id').change(function(){
-                    var selected_user = $("#user_id").val();
-                    var chart_div = $('#chart_div');
-                    if(selected_user) {
-                        loading.show();
-                        chart_div.hide();
-                        $.getJSON("/api/v1/presence_weekday/"+selected_user, function(result) {
-                            var data = google.visualization.arrayToDataTable(result);
-                            var options = {};
-                            chart_div.show();
-                            loading.hide();
-                            var chart = new google.visualization.PieChart(chart_div[0]);
+
+                $('#user-id').change(function() {
+                    var $chartDiv = $('#chart-div'),
+                        selectedUser = $('#user-id').val();
+
+                    if(selectedUser) {
+                        $loading.show();
+                        $chartDiv.hide();
+
+                        $.getJSON('/api/v1/presence_weekday/' + selectedUser, function(result) {
+                            var chart = new google.visualization.PieChart($chartDiv[0]),
+                                data = google.visualization.arrayToDataTable(result),
+                                options = {};
+                            $chartDiv.show();
+                            $loading.hide();
                             chart.draw(data, options);
                         });
                     }
@@ -114,19 +121,20 @@
     <div id="main">
         <div id="header">
             <h1>Presence analyzer</h1>
-            
+
             <ul>
                 <li id="selected"><a href="/static/presence_weekday.html">Presence by weekday</a></li>
                 <li><a href="/static/mean_time_weekday.html">Presence mean time</a></li>
+                <li><a href="/static/presence_start_end.html">Presence start-end</a></li>
             </ul>
         </div>
         <div id="content">
             <h2>Presence by weekday</h2>
             <p>
-                <select id="user_id" style="display: none">
+                <select id="user-id" style="display: none">
                     <option value="">--</option>
                 </select>
-                <div id="chart_div" style="display: none">
+                <div id="chart-div" style="display: none">
                 </div>
                 <div id="loading">
                     <img src="/static/img/loading.gif" />

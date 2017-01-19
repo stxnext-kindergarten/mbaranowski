@@ -61,13 +61,13 @@ class PresenceAnalyzerViewsTestCase(unittest.TestCase):
         Test mean time weekday view.
         """
         weekdays_means = [
-            ['Mon', 19733.666666666668],
-            ['Tue', 19733.666666666668],
-            ['Wed', 19733.666666666668],
-            ['Thu', 19733.666666666668],
-            ['Fri', 19733.666666666668],
-            ['Sat', 19733.666666666668],
-            ['Sun', 19733.666666666668],
+            ['Mon', 24123.0],
+            ['Tue', 16564.0],
+            ['Wed', 25321.0],
+            ['Thu', 22984.0],
+            ['Fri', 6426.0],
+            ['Sat', 0],
+            ['Sun', 0],
         ]
 
         resp = self.client.get('/api/v1/mean_time_weekday/11')
@@ -90,13 +90,13 @@ class PresenceAnalyzerViewsTestCase(unittest.TestCase):
         """
         weekdays_presence = [
             ['Weekday', 'Presence (s)'],
-            ['Mon', 78217],
-            ['Tue', 78217],
-            ['Wed', 78217],
-            ['Thu', 78217],
-            ['Fri', 78217],
-            ['Sat', 78217],
-            ['Sun', 78217],
+            ['Mon', 0],
+            ['Tue', 30047],
+            ['Wed', 24465],
+            ['Thu', 23705],
+            ['Fri', 0],
+            ['Sat', 0],
+            ['Sun', 0],
         ]
 
         resp = self.client.get('/api/v1/presence_weekday/10')
@@ -112,6 +112,26 @@ class PresenceAnalyzerViewsTestCase(unittest.TestCase):
         resp = self.client.get('/api/v1/presence_weekday/0')
 
         self.assertEqual(resp.status_code, 404)
+
+    def test_group_by_weekday_start_end(self):
+        """
+        Test getting interval of mean presence time grouped by weekday
+        """
+        weekdays_means = [
+            ['Mon', 33134.0, 57257.0],
+            ['Tue', 33590.0, 50154.0],
+            ['Wed', 33206.0, 58527.0],
+            ['Thu', 35602.0, 58586.0],
+            ['Fri', 47816.0, 54242.0],
+            ['Sat', 0, 0],
+            ['Sun', 0, 0],
+        ]
+
+        resp = self.client.get('/api/v1/presence_start_end/11')
+        data = json.loads(resp.data)
+
+        self.assertEqual(resp.status_code, 200)
+        self.assertListEqual(weekdays_means, data)
 
 
 class PresenceAnalyzerUtilsTestCase(unittest.TestCase):
@@ -178,7 +198,7 @@ class PresenceAnalyzerUtilsTestCase(unittest.TestCase):
         """
         Test group_be_weekday method.
         """
-        result = 7 * [[28800, 29700, 30600]]
+        result = [[], [28800, 30600], [29700], [], [], [], []]
         test_data = {
             datetime.date(2013, 10, 1): {
                 'start': datetime.time(9, 0, 0),
@@ -197,6 +217,40 @@ class PresenceAnalyzerUtilsTestCase(unittest.TestCase):
         grouped_by_weekday = utils.group_by_weekday(test_data)
 
         self.assertListEqual(grouped_by_weekday, result)
+
+    def test_group_by_weekday_start_end(self):
+        """
+        Test group_by_weekday_start_end method.
+        """
+        result = {
+            0: {'start': [], 'end': []},
+            1: {'start': [32400, 32400], 'end': [61200, 63000]},
+            2: {'start': [30600], 'end': [60300]},
+            3: {'start': [], 'end': []},
+            4: {'start': [], 'end': []},
+            5: {'start': [], 'end': []},
+            6: {'start': [], 'end': []},
+        }
+        test_data = {
+            datetime.date(2013, 10, 1): {
+                'start': datetime.time(9, 0, 0),
+                'end': datetime.time(17, 30, 0)
+            },
+            datetime.date(2013, 10, 8): {
+                'start': datetime.time(9, 0, 0),
+                'end': datetime.time(17, 0, 0)
+            },
+            datetime.date(2013, 10, 2): {
+                'start': datetime.time(8, 30, 0),
+                'end': datetime.time(16, 45, 0)
+            },
+        }
+
+        data = utils.group_by_weekday_start_end(test_data)
+
+        for day in range(7):
+            self.assertListEqual(data[day]['start'], result[day]['start'])
+            self.assertListEqual(data[day]['end'], result[day]['end'])
 
 
 def suite():
