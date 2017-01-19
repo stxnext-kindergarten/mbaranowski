@@ -7,7 +7,7 @@ from setuptools import find_packages, setup
 
 
 NAME = 'presence_analyzer'
-VERSION = '0.1.0'
+version = "0.2.2"
 
 
 def read(*rnames):
@@ -36,5 +36,12 @@ setup(
         'setuptools',
         'Flask',
     ],
-    entry_points='',
+    entry_points="""
+    [console_scripts]
+    flask-ctl = presence_analyzer.script:run
+
+    [paste.app_factory]
+    main = presence_analyzer.script:make_app
+    debug = presence_analyzer.script:make_debug
+    """,
 )
