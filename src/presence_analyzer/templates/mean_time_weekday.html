@@ -1,0 +1,9 @@
+{% extends "base.html" %}
+
+{% block data_js %}
+    <script src="{{ url_for('static', filename='/js/mean.js') }}"></script>
+{% endblock %}
+
+{% block tab_name %}
+    <h2>Presence mean time by weekday</h2>
+{% endblock %}
