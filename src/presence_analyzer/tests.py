@@ -42,7 +42,7 @@ class PresenceAnalyzerViewsTestCase(unittest.TestCase):
         resp = self.client.get('/')
 
         self.assertEqual(resp.status_code, 302)
-        assert resp.headers['Location'].endswith('/presence_weekday.html')
+        assert resp.headers['Location'].endswith('/presence_weekday')
 
     def test_api_users(self):
         """
@@ -198,7 +198,15 @@ class PresenceAnalyzerUtilsTestCase(unittest.TestCase):
         """
         Test group_be_weekday method.
         """
-        result = [[], [28800, 30600], [29700], [], [], [], []]
+        result = {
+            0: [],
+            1: [28800, 30600],
+            2: [29700],
+            3: [],
+            4: [],
+            5: [],
+            6: [],
+        }
         test_data = {
             datetime.date(2013, 10, 1): {
                 'start': datetime.time(9, 0, 0),
@@ -216,7 +224,7 @@ class PresenceAnalyzerUtilsTestCase(unittest.TestCase):
 
         grouped_by_weekday = utils.group_by_weekday(test_data)
 
-        self.assertListEqual(grouped_by_weekday, result)
+        self.assertDictEqual(grouped_by_weekday, result)
 
     def test_group_by_weekday_start_end(self):
         """

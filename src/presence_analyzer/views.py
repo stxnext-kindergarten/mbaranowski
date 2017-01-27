@@ -5,7 +5,8 @@ Defines views.
 from calendar import day_abbr
 from logging import getLogger
 
-from flask import abort, redirect
+from flask import abort, redirect, render_template
+from jinja2 import TemplateNotFound
 
 from presence_analyzer.main import app
 from presence_analyzer.utils import (
@@ -22,11 +23,22 @@ log = getLogger(__name__)  # pylint: disable=invalid-name
 
 
 @app.route('/')
-def mainpage():
+def index():
     """
-    Redirects to front page.
+    Redirects to the front page.
     """
-    return redirect('/static/presence_weekday.html')
+    return redirect('/templates/presence_weekday')
+
+
+@app.route('/templates/<string:tab>')
+def mainpage(tab):
+    """
+    Renders the front page.
+    """
+    try:
+        return render_template('{}.html'.format(tab))
+    except TemplateNotFound:
+        abort(404)
 
 
 @app.route('/api/v1/users', methods=['GET'])

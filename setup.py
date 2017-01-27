@@ -7,7 +7,7 @@ from setuptools import find_packages, setup
 
 
 NAME = 'presence_analyzer'
-version = "0.2.2"
+VERSION = "0.2.2"
 
 
 def read(*rnames):
