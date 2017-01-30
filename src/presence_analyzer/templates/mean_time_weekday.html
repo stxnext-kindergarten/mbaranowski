@@ -1,9 +1,9 @@
-{% extends "base.html" %}
+<%inherit file="base.html"/>
 
-{% block data_js %}
-    <script src="{{ url_for('static', filename='/js/mean.js') }}"></script>
-{% endblock %}
+<%block name="data_js">
+    <script src="${ url_for('static', filename='js/mean.js') }"></script>
+</%block>
 
-{% block tab_name %}
+<%block name="tab_name">
     <h2>Presence mean time by weekday</h2>
-{% endblock %}
+</%block>

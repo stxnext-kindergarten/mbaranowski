@@ -5,8 +5,9 @@ Defines views.
 from calendar import day_abbr
 from logging import getLogger
 
-from flask import abort, redirect, render_template
-from jinja2 import TemplateNotFound
+from flask import abort, redirect
+from flask_mako import render_template
+from mako.exceptions import TopLevelLookupException
 
 from presence_analyzer.main import app
 from presence_analyzer.utils import (
@@ -37,7 +38,7 @@ def mainpage(tab):
     """
     try:
         return render_template('{}.html'.format(tab))
-    except TemplateNotFound:
+    except TopLevelLookupException:
         abort(404)
 
 
