@@ -12,6 +12,7 @@ from mako.exceptions import TopLevelLookupException
 from presence_analyzer.main import app
 from presence_analyzer.utils import (
     get_data,
+    get_full_users_data,
     group_by_weekday,
     group_by_weekday_start_end,
     jsonify,
@@ -48,10 +49,13 @@ def users_view():
     """
     Users listing for dropdown.
     """
-    data = get_data()
+    data = get_full_users_data()
 
     return [
-        {'user_id': i, 'name': 'User {0}'.format(str(i))}
+        {
+            'user_id': i,
+            'name': '{} ({})'.format(data[i]['name'].encode('utf-8'), i)
+        }
         for i in data.keys()
     ]
 
@@ -113,3 +117,24 @@ def start_end_view(user_id):
         mean_by_weekday(weekday, intervals)
         for weekday, intervals in weekdays_data.items()
     ]
+
+
+@app.route('/api/v1/users/<int:usr_id>', methods=['GET'])
+@jsonify
+def users_info_view(usr_id):
+    """
+    Returns information about given user.
+    """
+    data = get_full_users_data()
+    if usr_id not in data:
+        log.debug('User %s not found!', usr_id)
+        abort(404)
+
+    return {
+        'user_id': usr_id,
+        'user_name': '{} ({})'.format(
+            data[usr_id]['name'].encode('utf-8'),
+            usr_id
+        ),
+        'avatar': data[usr_id]['avatar'],
+    }

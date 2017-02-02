@@ -6,8 +6,10 @@
 
         $('#user-id').change(function(){
             var $chartDiv = $('#chart-div'),
+                $errorContainer = $('#data-error'),
                 selectedUser = $('#user-id').val();
 
+            $errorContainer.text('');
             if(selectedUser) {
                 $loading.show();
                 $chartDiv.hide();
@@ -33,6 +35,8 @@
                     formatter.format(data, 2);
 
                     drawChart($chartDiv, $loading, chart, data, options);
+                }).fail(function(jqXHR) {
+                    showError(jqXHR, $loading, $errorContainer)
                 });
             }
         });
