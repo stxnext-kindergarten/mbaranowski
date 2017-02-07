@@ -6,8 +6,10 @@
 
         $('#user-id').change(function() {
             var $chartDiv = $('#chart-div'),
+                $errorContainer = $('#data-error'),
                 selectedUser = $('#user-id').val();
 
+            $errorContainer.text('');
             if(selectedUser) {
                 $loading.show();
                 $chartDiv.hide();
@@ -16,7 +18,10 @@
                     var chart = new google.visualization.PieChart($chartDiv[0]),
                         data = google.visualization.arrayToDataTable(result),
                         options = {};
+
                     drawChart($chartDiv, $loading, chart, data, options);
+                }).fail(function(jqXHR) {
+                    showError(jqXHR, $loading, $errorContainer);
                 });
             }
         });

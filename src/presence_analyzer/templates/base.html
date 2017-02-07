@@ -58,14 +58,16 @@
                 <select id="user-id" style="display: none">
                     <option value="">--</option>
                 </select>
-                <div id="chart-div" style="display: none">
-                </div>
+
+                <div id="avatar"></div>
+                <div id="chart-div" style="display: none"></div>
+
                 <div id="loading">
                     <img src="${ url_for('static', filename='/img/loading.gif') }" />
                 </div>
+                <div id="data-error"></div>
             </p>
         </div>
-
     </div>
 </body>
 </html>

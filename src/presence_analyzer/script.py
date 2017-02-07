@@ -5,6 +5,7 @@
 import os
 import sys
 from functools import partial
+from urllib2 import urlopen
 
 import paste.script.command
 import werkzeug.script
@@ -111,3 +112,15 @@ def run():
         _serve('stop', dry_run=dry_run)
 
     werkzeug.script.run()
+
+
+# bin/update_user_data
+def update_user_data():
+    """
+    Gets data from the app.config['URL_FOR_XML']
+    and saves it in the file app.config['DATA_XML'].
+    """
+    app = make_app()
+
+    with open(app.config['DATA_XML'], 'wb') as xml_users:
+        xml_users.write(urlopen(app.config['URL_FOR_XML']).read())

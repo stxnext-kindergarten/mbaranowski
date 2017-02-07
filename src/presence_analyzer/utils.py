@@ -10,6 +10,7 @@ from json import dumps
 from logging import getLogger
 
 from flask import Response
+from lxml import etree
 
 from presence_analyzer.main import app
 
@@ -126,6 +127,87 @@ def group_by_weekday_start_end(items):
 
 def mean_by_weekday(day, val):
     """
-    Return a list that contain weekday, mean of beginning and end of presence.
+    Returns a list that contain weekday, mean of beginning and end of presence.
     """
     return [day_abbr[day], mean(val['start']), mean(val['end'])]
+
+
+def get_user_data(user, url):
+    """
+    Returns dictionary with user's id, name, and full path to avatar.
+    """
+    return {
+        'id': int(user.attrib['id']),
+        'data': {
+            'name': user.find('name').text,
+            'avatar': '{}{}'.format(url, user.find('avatar').text)
+        }
+    }
+
+
+def get_users_avatar_name():
+    """
+    Creates a dictionary with users' full info.
+
+    Returns: (dict) - with user data, like:
+    {
+        'user_id_0': {
+            'name': 'Kajetan O.',
+            'avatar': 'https://intranet.stxnext.pl:443/api/images/users/130',
+        },
+        'user_id_1': {
+            'name': 'Adam P.',
+            'avatar': 'https://intranet.stxnext.pl:443/api/images/users/141',
+        },
+        ...
+    }
+    """
+    all_users_data = {}
+    etree_users = etree.parse(app.config['DATA_XML'])
+
+    etree_server = etree_users.find('server')
+    server_address = '{}://{}:{}'.format(
+        etree_server.find('protocol').text,
+        etree_server.find('host').text,
+        etree_server.find('port').text
+    )
+
+    users = etree_users.find('users').xpath('//user')
+    for user in users:
+        user_data = get_user_data(user, server_address)
+        all_users_data[user_data['id']] = user_data['data']
+
+    return all_users_data
+
+
+def get_full_users_data():
+    """
+    Creates a dictionary with users' full info and presence data from XML
+    and CSV file and groups it by user_id.
+
+    Returns: (dict) - with users' data, like:
+    {
+        'user_id': {
+            'name': 'Kajetan O.',
+            'avatar': '/api/images/users/130',
+            'presence': {
+                datetime.date(2013, 10, 1): {
+                    'start': datetime.time(9, 0, 0),
+                    'end': datetime.time(17, 30, 0),
+                },
+                datetime.date(2013, 10, 2): {
+                    'start': datetime.time(8, 30, 0),
+                    'end': datetime.time(16, 45, 0),
+                },
+            }
+        },
+        ...
+    }
+    """
+    users_info = get_users_avatar_name()
+    users_data = get_data()
+
+    for user_id in users_info:
+        users_info[user_id]['presence'] = users_data.setdefault(user_id, {})
+
+    return users_info
