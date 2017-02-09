@@ -8,6 +8,7 @@ from datetime import datetime
 from functools import wraps
 from json import dumps
 from logging import getLogger
+from threading import Lock
 
 from flask import Response
 from lxml import etree
@@ -16,6 +17,40 @@ from presence_analyzer.main import app
 
 
 log = getLogger(__name__)  # pylint: disable=invalid-name
+
+
+class Cache(object):
+    """
+    Decorator that caches data for a given time.
+    """
+    def __init__(self, seconds):
+        self.cached_data = None
+        self.duration = seconds
+        self.last_update = None
+        self.thread_lock = Lock()
+
+    def __call__(self, function):
+        """
+        Returns decorated function.
+        """
+        @wraps(function)
+        def wrapper(*args, **kwargs):
+            """
+            Returns decorated data.
+            """
+            with self.thread_lock:
+                if self.last_update is None:
+                    self.cached_data = function(*args, **kwargs)
+                    self.last_update = datetime.now()
+                else:
+                    time_diff = datetime.now() - self.last_update
+                    elapsed_seconds = int(time_diff.total_seconds())
+                    if elapsed_seconds >= self.duration:
+                        self.cached_data = function(*args, **kwargs)
+                        self.last_update = None
+
+            return self.cached_data
+        return wrapper
 
 
 def jsonify(function):
@@ -34,6 +69,7 @@ def jsonify(function):
     return inner
 
 
+@Cache(600)
 def get_data():
     """
     Extracts presence data from CSV file and groups it by user_id.

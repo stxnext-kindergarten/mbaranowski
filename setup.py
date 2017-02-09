@@ -37,6 +37,7 @@ setup(
         'Flask',
         'Flask-Mako',
         'lxml',
+        'freezegun',
     ],
     entry_points="""
     [console_scripts]
