@@ -7,6 +7,7 @@ import json
 import os.path
 import unittest
 
+from freezegun import freeze_time
 from lxml import etree
 
 # pylint: disable=unused-import
@@ -399,6 +400,32 @@ class PresenceAnalyzerUtilsTestCase(unittest.TestCase):
         }
 
         self.assertDictEqual(utils.get_full_users_data(), test_data)
+
+    def test_cache_decorator(self):
+        """
+        Test checks the Cache decorator.
+        """
+
+        cache = utils.Cache(600)
+        cache.cached_data = None
+
+        @cache
+        def fun(some_data):
+            return some_data
+
+        with freeze_time('2013-01-14 12:10:01'):
+            data_1 = fun(10)
+        self.assertEqual(data_1, 10)
+
+        with freeze_time('2013-01-14 12:20:00'):
+            data_2 = fun(20)
+        self.assertEqual(data_2, data_1)
+
+        with freeze_time('2013-01-14 12:20:01'):
+            data_3 = fun(30)
+        self.assertNotEqual(data_3, data_2)
+
+        cache.cached_data = None
 
 
 def suite():
