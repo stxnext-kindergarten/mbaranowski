@@ -94,7 +94,7 @@ def get_data():
         presence_reader = reader(csvfile, delimiter=',')
 
         for i, row in enumerate(presence_reader):
-            if len(row) != 4:
+            if len(row) != 5:
                 # ignore header and footer lines
                 continue
 
@@ -235,7 +235,8 @@ def get_full_users_data():
                     'start': datetime.time(8, 30, 0),
                     'end': datetime.time(16, 45, 0),
                 },
-            }
+                ...
+            },
         },
         ...
     }
@@ -247,3 +248,48 @@ def get_full_users_data():
         users_info[user_id]['presence'] = users_data.setdefault(user_id, {})
 
     return users_info
+
+
+@Cache(600)
+def get_year_month_location():
+    """
+    Extracts presence data from CSV file and groups it by month.
+
+    It creates structure like this:
+    {
+        '2015-01': {
+            'Pila': 11234,
+            'Poznan': 678900,
+            'Lodz': 77373,
+        },
+        '2016-02': {
+            'Poznan': 554327,
+            ...
+        },
+        ...
+    }
+    """
+    data = {}
+
+    with open(app.config['DATA_CSV'], 'r') as csvfile:
+        presence_reader = reader(csvfile, delimiter=',')
+
+        for i, row in enumerate(presence_reader):
+            if len(row) != 5:
+                # ignore header and footer lines
+                continue
+
+            try:
+                year_month = row[1][:-3]
+                start = datetime.strptime(row[2], '%H:%M:%S').time()
+                end = datetime.strptime(row[3], '%H:%M:%S').time()
+                location = row[4]
+
+                data.setdefault(year_month, {})
+                data[year_month].setdefault(location, 0)
+                data[year_month][location] += interval(start, end)
+
+            except (ValueError, TypeError):
+                log.debug('Problem with line %d: ', i, exc_info=True)
+
+    return data

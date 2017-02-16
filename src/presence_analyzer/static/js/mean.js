@@ -2,6 +2,7 @@
     $(document).ready(function(){
         var $loading = $('#loading');
 
+        getAvatar();
         getDataJSON('/api/v1/users', $loading);
 
         $('#user-id').change(function(){

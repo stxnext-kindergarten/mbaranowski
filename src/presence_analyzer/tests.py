@@ -2,12 +2,14 @@
 """
 Presence analyzer unit tests.
 """
+from __future__ import unicode_literals
+
 import datetime
 import json
 import os.path
 import unittest
 
-from freezegun import freeze_time
+import mock
 from lxml import etree
 
 # pylint: disable=unused-import
@@ -174,6 +176,50 @@ class PresenceAnalyzerViewsTestCase(unittest.TestCase):
         Test getting info for user's id that don't exist.
         """
         resp = self.client.get('/api/v1/users/0')
+
+        self.assertEqual(resp.status_code, 404)
+
+    def test_year_month_view(self):
+        """
+        Test getting information about data's availability.
+        """
+        date_info = [
+            {
+                'key': '2013-09',
+                'val': '2013 September',
+            }
+        ]
+
+        resp = self.client.get('/api/v1/presence_location_view')
+        data = json.loads(resp.data)
+
+        self.assertEqual(resp.status_code, 200)
+        self.assertListEqual(data, date_info)
+
+    def test_presence_location_view(self):
+        """
+        Test getting data for a given month.
+        """
+        location_info = {
+            'user_id': '2013-09',
+            'locations': {
+                'Pila': 76015,
+                'Poznan': 66350,
+                'Lodz': 54254,
+            },
+        }
+
+        resp = self.client.get('/api/v1/presence_location_view/2013-09')
+        data = json.loads(resp.data)
+
+        self.assertEqual(resp.status_code, 200)
+        self.assertDictEqual(data, location_info)
+
+    def test_location_view_date_do_not_exist(self):
+        """
+        Test getting info for date's id that don't exist.
+        """
+        resp = self.client.get('/api/v1/presence_location_view/0')
 
         self.assertEqual(resp.status_code, 404)
 
@@ -401,31 +447,48 @@ class PresenceAnalyzerUtilsTestCase(unittest.TestCase):
 
         self.assertDictEqual(utils.get_full_users_data(), test_data)
 
-    def test_cache_decorator(self):
+    @mock.patch('presence_analyzer.utils.datetime')
+    def test_cache_decorator(self, datetime_mock):
         """
         Test checks the Cache decorator.
         """
-
         cache = utils.Cache(600)
         cache.cached_data = None
 
         @cache
         def fun(some_data):
+            """
+            Function to test the cache
+            """
             return some_data
 
-        with freeze_time('2013-01-14 12:10:01'):
-            data_1 = fun(10)
+        datetime_mock.now.return_value = datetime.datetime(2010, 1, 1, 13, 10)
+        data_1 = fun(10)
         self.assertEqual(data_1, 10)
 
-        with freeze_time('2013-01-14 12:20:00'):
-            data_2 = fun(20)
+        datetime_mock.now.return_value = datetime.datetime(2010, 1, 1, 13, 19)
+        data_2 = fun(20)
         self.assertEqual(data_2, data_1)
 
-        with freeze_time('2013-01-14 12:20:01'):
-            data_3 = fun(30)
+        datetime_mock.now.return_value = datetime.datetime(2010, 1, 2, 13, 20)
+        data_3 = fun(30)
         self.assertNotEqual(data_3, data_2)
 
-        cache.cached_data = None
+    def test_get_year_month_location(self):
+        """
+        Test parsing of CSV file.
+        """
+        sample_date = {
+            '2013-09': {
+                'Pila': 76015,
+                'Poznan': 66350,
+                'Lodz': 54254
+            }
+        }
+
+        data = utils.get_year_month_location()
+
+        self.assertDictEqual(data, sample_date)
 
 
 def suite():

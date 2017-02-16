@@ -32,19 +32,33 @@ function showError(jqXHR, loading, errorContainer) {
     }
 }
 
-(function($) {
-    $(document).ready(function() {
-        $('#user-id').change(function() {
-            var $avatarUrl = $('#avatar'),
-                selectedUser = $('#user-id').val(),
-                $userName = $('#user-name');
+function getAvatar() {
+    $('#user-id').change(function() {
+        var $avatarUrl = $('#avatar'),
+            selectedUser = $('#user-id').val(),
+            $userName = $('#user-name');
 
-            $avatarUrl.hide();
-            $userName.hide();
+        $avatarUrl.hide();
+        $userName.hide();
 
-            $.getJSON('/api/v1/users/' + selectedUser, function(result) {
-                $avatarUrl.empty().prepend($('<img>', {src: result.avatar})).show();
-            });
+        $.getJSON('/api/v1/users/' + selectedUser, function(result) {
+            $avatarUrl.empty().prepend($('<img>', {src: result.avatar})).show();
         });
     });
-})(jQuery);
+}
+
+function getYearMonthJSON(url, loading) {
+    $.getJSON(url, function(result) {
+        var $dropdown = $('#user-id');
+
+        $.each(result, function(item) {
+            $dropdown.append($('<option/>', {
+                'val': this.key,
+                'text': this.val
+            }));
+        });
+
+        $dropdown.show();
+        loading.hide();
+    });
+}
