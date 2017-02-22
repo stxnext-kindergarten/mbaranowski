@@ -2,7 +2,7 @@
 """
 Defines views.
 """
-from calendar import day_abbr
+from calendar import day_abbr, month_name
 from logging import getLogger
 
 from flask import abort, redirect
@@ -13,6 +13,7 @@ from presence_analyzer.main import app
 from presence_analyzer.utils import (
     get_data,
     get_full_users_data,
+    get_year_month_location,
     group_by_weekday,
     group_by_weekday_start_end,
     jsonify,
@@ -137,4 +138,47 @@ def users_info_view(usr_id):
             usr_id
         ),
         'avatar': data[usr_id]['avatar'],
+    }
+
+
+@app.route('/api/v1/presence_location_view', methods=['GET'])
+@jsonify
+def year_month_view():
+    """
+    Year & month listing for a dropdown.
+    """
+    data = get_year_month_location()
+
+    return [
+        {
+            'key': item,
+            'val': '{} {}'.format(item[:4], month_name[int(item[5: 7])]),
+        }
+        for item in data.keys()
+    ]
+
+
+@app.route('/api/v1/presence_location_view/<string:date_id>', methods=['GET'])
+@jsonify
+def location_view(date_id):
+    """
+    Returns: (dict) - with location data for a given month, like:
+    {
+        'user_id': '2012-01',
+        'locations': {
+            'Pila': 3028793,
+            'Poznan': 2987470,
+            'Lodz': 2823194
+        },
+    }
+    """
+    data = get_year_month_location()
+
+    if date_id not in data:
+        log.debug('Data %s not found!', date_id)
+        abort(404)
+
+    return {
+        'user_id': date_id,
+        'locations': data[date_id],
     }

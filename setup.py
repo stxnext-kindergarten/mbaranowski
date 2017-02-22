@@ -37,7 +37,7 @@ setup(
         'Flask',
         'Flask-Mako',
         'lxml',
-        'freezegun',
+        'mock',
     ],
     entry_points="""
     [console_scripts]

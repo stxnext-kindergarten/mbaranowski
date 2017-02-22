@@ -7,10 +7,9 @@
     <meta name="description" content="" />
     <meta name="author" content="STX Next sp. z o.o." />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-
+    <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
     <link href="${ url_for('static', filename='css/normalize.css') }" media="all" rel="stylesheet" type="text/css" />
     <link href="${ url_for('static', filename='css/style.css') }" media="all" rel="stylesheet" type="text/css" />
-
     <script src="${ url_for('static', filename='js/jquery.min.js') }"></script>
     <script type="text/javascript" src="https://www.google.com/jsapi"></script>
     <script type="text/javascript">
@@ -48,6 +47,13 @@
                     % endif
                 >
                     <a href="${ url_for('mainpage', tab='presence_start_end') }">Presence start-end</a>
+                </li>
+                <li
+                    % if request.path == "/templates/presence_location":
+                        class="selected"
+                    % endif
+                >
+                    <a href="${ url_for('mainpage', tab='presence_location') }">Presence by location</a>
                 </li>
             </ul>
         </div>
