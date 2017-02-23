@@ -62,3 +62,10 @@ function getYearMonthJSON(url, loading) {
         loading.hide();
     });
 }
+
+function isDataAvailable(data, start) {
+    for(var i = start, sum = 0; i < data.length; i++) {
+        sum += data[i][1];
+    }
+    return sum !== 0;
+}
