@@ -16,13 +16,16 @@
                 $chartDiv.hide();
 
                 $.getJSON('/api/v1/presence_weekday/' + selectedUser, function(result) {
-                    var chart = new google.visualization.PieChart($chartDiv[0]),
-                        data = google.visualization.arrayToDataTable(result),
-                        options = {};
+                    if(isDataAvailable(result, 1)) {
+                        var chart = new google.visualization.PieChart($chartDiv[0]),
+                            data = google.visualization.arrayToDataTable(result),
+                            options = {};
 
-                    drawChart($chartDiv, $loading, chart, data, options);
-                }).fail(function(jqXHR) {
-                    showError(jqXHR, $loading, $errorContainer);
+                        drawChart($chartDiv, $loading, chart, data, options);
+                    } else {
+                        $loading.hide();
+                        $errorContainer.text('User has no data.');
+                    }
                 });
             }
         });
