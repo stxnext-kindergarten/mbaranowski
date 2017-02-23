@@ -10,6 +10,7 @@
                 selectedMonth = $('#user-id').val();
 
             $errorContainer.text('');
+            $chartDiv.hide();
             if(selectedMonth) {
                 $loading.show();
                 $.getJSON('/api/v1/presence_location_view/' + selectedMonth, function(result) {
@@ -17,7 +18,8 @@
                         var chart = new google.visualization.BarChart($chartDiv[0]),
                             data,
                             options = {
-                                chartArea: {width: '50%'},
+                                width: 750,
+                                height: 750,
                                 hAxis: {minValue: 0},
                             },
                             rawData = [['Location', 'Hours']];

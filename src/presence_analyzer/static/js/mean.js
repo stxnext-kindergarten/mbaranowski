@@ -11,9 +11,9 @@
                 selectedUser = $('#user-id').val();
 
             $errorContainer.text('');
+            $chartDiv.hide();
             if(selectedUser) {
                 $loading.show();
-                $chartDiv.hide();
 
                 $.getJSON('/api/v1/mean_time_weekday/' + selectedUser, function(result) {
                     var chart = new google.visualization.ColumnChart($chartDiv[0]),
