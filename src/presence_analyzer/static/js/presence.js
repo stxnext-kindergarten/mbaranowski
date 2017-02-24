@@ -11,9 +11,9 @@
                 selectedUser = $('#user-id').val();
 
             $errorContainer.text('');
+            $chartDiv.hide();
             if(selectedUser) {
                 $loading.show();
-                $chartDiv.hide();
 
                 $.getJSON('/api/v1/presence_weekday/' + selectedUser, function(result) {
                     if(isDataAvailable(result, 1)) {
