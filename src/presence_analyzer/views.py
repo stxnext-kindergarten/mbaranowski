@@ -2,6 +2,7 @@
 """
 Defines views.
 """
+import locale
 from calendar import day_abbr, month_name
 from logging import getLogger
 
@@ -50,15 +51,20 @@ def users_view():
     """
     Users listing for dropdown.
     """
+    locale.setlocale(locale.LC_COLLATE, 'pl_PL.UTF-8')
     data = get_full_users_data()
 
-    return [
-        {
-            'user_id': i,
-            'name': data[i]['name'].encode('utf-8')
-        }
-        for i in data.keys()
-    ]
+    return sorted(
+        [
+            {
+                'user_id': i,
+                'name': data[i]['name'].encode('utf-8')
+            }
+            for i in data.keys()
+        ],
+        key=lambda x: x['name'],
+        cmp=locale.strcoll
+    )
 
 
 @app.route('/api/v1/mean_time_weekday/<int:user_id>', methods=['GET'])

@@ -66,15 +66,15 @@ class PresenceAnalyzerViewsTestCase(unittest.TestCase):
         self.assertDictEqual(
             data[0],
             {
-                'user_id': 10,
-                'name': 'Maciej Z.',
+                'user_id': 11,
+                'name': 'Maciej D.',
             }
         )
         self.assertDictEqual(
             data[1],
             {
-                'user_id': 11,
-                'name': 'Maciej D.',
+                'user_id': 10,
+                'name': 'Maciej Z.',
             }
         )
 
