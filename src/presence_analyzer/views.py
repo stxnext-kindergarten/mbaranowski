@@ -55,7 +55,7 @@ def users_view():
     return [
         {
             'user_id': i,
-            'name': '{} ({})'.format(data[i]['name'].encode('utf-8'), i)
+            'name': data[i]['name'].encode('utf-8')
         }
         for i in data.keys()
     ]
