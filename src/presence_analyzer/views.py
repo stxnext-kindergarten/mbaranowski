@@ -3,6 +3,7 @@
 Defines views.
 """
 import locale
+import operator
 from calendar import day_abbr, month_name
 from logging import getLogger
 
@@ -62,7 +63,7 @@ def users_view():
             }
             for i in data.keys()
         ],
-        key=lambda x: x['name'],
+        key=operator.itemgetter('name'),
         cmp=locale.strcoll
     )
 
@@ -155,13 +156,17 @@ def year_month_view():
     """
     data = get_year_month_location()
 
-    return [
-        {
-            'key': item,
-            'val': '{} {}'.format(item[:4], month_name[int(item[5: 7])]),
-        }
-        for item in data.keys()
-    ]
+    return sorted(
+        [
+            {
+                'key': item,
+                'val': '{} {}'.format(item[:4], month_name[int(item[5:])]),
+            }
+            for item in data.keys()
+        ],
+        key=operator.itemgetter('key'),
+        reverse=True
+    )
 
 
 @app.route('/api/v1/presence_location_view/<string:date_id>', methods=['GET'])
