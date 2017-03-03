@@ -69,3 +69,19 @@ function isDataAvailable(data, start) {
     }
     return sum !== 0;
 }
+
+function drawGender(fun, loading, chartDiv){
+    google.charts.load('current', {packages: ['corechart', 'bar']});
+    loading.hide();
+    google.charts.setOnLoadCallback(fun);
+    chartDiv.show();
+}
+
+function loadGenderDropdown(dropdown) {
+    $.each(['male', 'female'], function (index, gender) {
+        dropdown.append($('<option/>', {
+            'val': gender,
+            'text': gender,
+        }));
+    });
+}

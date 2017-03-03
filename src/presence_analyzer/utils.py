@@ -94,7 +94,7 @@ def get_data():
         presence_reader = reader(csvfile, delimiter=',')
 
         for i, row in enumerate(presence_reader):
-            if len(row) != 5:
+            if len(row) != 6:
                 # ignore header and footer lines
                 continue
 
@@ -275,7 +275,7 @@ def get_year_month_location():
         presence_reader = reader(csvfile, delimiter=',')
 
         for i, row in enumerate(presence_reader):
-            if len(row) != 5:
+            if len(row) != 6:
                 # ignore header and footer lines
                 continue
 
@@ -293,3 +293,82 @@ def get_year_month_location():
                 log.debug('Problem with line %d: ', i, exc_info=True)
 
     return data
+
+
+def get_location_gender(date_id):
+    """
+    Extracts presence data from CSV file and groups it by month and gender.
+
+    It creates structure like this:
+    {
+        'Pila': {
+            'female': 11234,
+            'male': 4555,
+        },
+        'Poznan': {
+            'female': 54234,
+            'male': 1255,
+        },
+        ...
+    }
+    """
+    data = {}
+
+    with open(app.config['DATA_CSV'], 'r') as csvfile:
+        presence_reader = reader(csvfile, delimiter=',')
+
+        for i, row in enumerate(presence_reader):
+            if len(row) != 6:
+                # ignore header and footer lines
+                continue
+
+            try:
+                if date_id == row[1][:-3]:
+                    start = datetime.strptime(row[2], '%H:%M:%S').time()
+                    end = datetime.strptime(row[3], '%H:%M:%S').time()
+                    location = row[4]
+                    gender = row[5]
+
+                    data.setdefault(location, {})
+                    data[location].setdefault(gender, 0)
+                    data[location][gender] += interval(start, end)
+
+            except (ValueError, TypeError):
+                log.debug('Problem with line %d: ', i, exc_info=True)
+
+    return data
+
+
+def restructure_data(data):
+    """
+    Returns restructured data.
+    It converts data from
+    {
+        'Pila': {
+            'female': 11234,
+            'male': 4555,
+        },
+        'Poznan': {
+            'female': 54234,
+            'male': 1255,
+        },
+        ...
+    }
+    to
+    {
+        'female': {
+            'Pila': 11234,
+            'Poznan': 54234,
+        },
+        'male': {
+            'Pila': 4555,
+            'Poznan': 1255,
+        },
+    }
+    """
+    restructured_data = {}
+    for town, genders in data.items():
+        for gender, value in genders.items():
+            restructured_data.setdefault(gender, {})
+            restructured_data[gender].setdefault(town, value)
+    return restructured_data
