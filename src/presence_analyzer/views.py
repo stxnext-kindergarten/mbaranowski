@@ -15,12 +15,14 @@ from presence_analyzer.main import app
 from presence_analyzer.utils import (
     get_data,
     get_full_users_data,
+    get_location_gender,
     get_year_month_location,
     group_by_weekday,
     group_by_weekday_start_end,
     jsonify,
     mean,
     mean_by_weekday,
+    restructure_data,
 )
 
 
@@ -169,27 +171,28 @@ def year_month_view():
     )
 
 
-@app.route('/api/v1/presence_location_view/<string:date_id>', methods=['GET'])
+@app.route(
+    '/api/v1/location_gender_view/<string:date_id>',
+    defaults={'gender': None},
+    methods=['GET']
+)
+@app.route(
+    '/api/v1/location_gender_view/<string:date_id>/<string:gender>',
+    methods=['GET']
+)
 @jsonify
-def location_view(date_id):
+def gender_view(date_id, gender):
     """
-    Returns: (dict) - with location data for a given month, like:
-    {
-        'user_id': '2012-01',
-        'locations': {
-            'Pila': 3028793,
-            'Poznan': 2987470,
-            'Lodz': 2823194
-        },
-    }
+    Returns: (dict) - with location data for a given month or
+    for a given location and gender.
     """
-    data = get_year_month_location()
+    data = get_location_gender(date_id)
 
-    if date_id not in data:
+    if not data:
         log.debug('Data %s not found!', date_id)
         abort(404)
 
-    return {
-        'user_id': date_id,
-        'locations': data[date_id],
-    }
+    if gender is None:
+        return data
+
+    return restructure_data(data)[gender]

@@ -196,25 +196,6 @@ class PresenceAnalyzerViewsTestCase(unittest.TestCase):
         self.assertEqual(resp.status_code, 200)
         self.assertListEqual(data, date_info)
 
-    def test_presence_location_view(self):
-        """
-        Test getting data for a given month.
-        """
-        location_info = {
-            'user_id': '2013-09',
-            'locations': {
-                'Pila': 76015,
-                'Poznan': 66350,
-                'Lodz': 54254,
-            },
-        }
-
-        resp = self.client.get('/api/v1/presence_location_view/2013-09')
-        data = json.loads(resp.data)
-
-        self.assertEqual(resp.status_code, 200)
-        self.assertDictEqual(data, location_info)
-
     def test_location_view_date_do_not_exist(self):
         """
         Test getting info for date's id that don't exist.
@@ -222,6 +203,47 @@ class PresenceAnalyzerViewsTestCase(unittest.TestCase):
         resp = self.client.get('/api/v1/presence_location_view/0')
 
         self.assertEqual(resp.status_code, 404)
+
+    def test_location_gender_month_view(self):
+        """
+        Test getting data for a given month.
+        """
+        location_info = {
+            'Pila': {
+                'female': 30047,
+                'male': 45968,
+            },
+            'Poznan': {
+                'female': 16564,
+                'male': 49786,
+            },
+            'Lodz': {
+                'female': 24123,
+                'male': 30131,
+            },
+        }
+
+        resp = self.client.get('/api/v1/location_gender_view/2013-09')
+        data = json.loads(resp.data)
+
+        self.assertEqual(resp.status_code, 200)
+        self.assertDictEqual(data, location_info)
+
+    def test_location_gender_month_gender_view(self):
+        """
+        Test getting data for a given month and gender.
+        """
+        location_info = {
+            'Lodz': 30131,
+            'Pila': 45968,
+            'Poznan': 49786,
+        }
+
+        resp = self.client.get('/api/v1/location_gender_view/2013-09/male')
+        data = json.loads(resp.data)
+
+        self.assertEqual(resp.status_code, 200)
+        self.assertDictEqual(data, location_info)
 
 
 class PresenceAnalyzerUtilsTestCase(unittest.TestCase):
@@ -487,6 +509,58 @@ class PresenceAnalyzerUtilsTestCase(unittest.TestCase):
         }
 
         data = utils.get_year_month_location()
+
+        self.assertDictEqual(data, sample_date)
+
+    def test_restructure_data(self):
+        """
+        Test if restructured data is correct.
+        """
+        sample_data_in = {
+            'Pila': {
+                'female': 11234,
+                'male': 4555,
+            },
+            'Poznan': {
+                'female': 54234,
+                'male': 1255,
+            },
+        }
+        sample_data_out = {
+            'female': {
+                'Pila': 11234,
+                'Poznan': 54234,
+            },
+            'male': {
+                'Pila': 4555,
+                'Poznan': 1255,
+            },
+        }
+
+        data = utils.restructure_data(sample_data_in)
+
+        self.assertDictEqual(data, sample_data_out)
+
+    def test_get_location_gender(self):
+        """
+        Test parsing of CSV file.
+        """
+        sample_date = {
+            'Lodz': {
+                'female': 24123,
+                'male': 30131,
+            },
+            'Pila': {
+                'female': 30047,
+                'male': 45968,
+            },
+            'Poznan': {
+                'female': 16564,
+                'male': 49786,
+            },
+        }
+
+        data = utils.get_location_gender('2013-09')
 
         self.assertDictEqual(data, sample_date)
 
